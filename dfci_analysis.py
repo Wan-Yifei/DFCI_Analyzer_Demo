@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 from pathlib import Path
 from multiprocessing import cpu_count
@@ -6,7 +7,7 @@ from bin.fastq_analyzer import FastqAnalyzer
 
 def main():
     num_cpus = max(cpu_count() - 1, 1)
-    parser = argparse.ArgumentParser(description="Analyze FASTQ files")
+    parser = argparse.ArgumentParser(description="Bioinformatics Toolbox Demo")
     parser.add_argument("-c", "--cpu", type=int, default=num_cpus,
                         help="Number of CPU cores to use for analysis (default: max CPU - 1)")
     parser.add_argument("-p", "--path", help="Path to a directory containing FASTQ/FASTA files or a single FASTQ/FASTA"
@@ -34,12 +35,18 @@ def main():
     args = parser.parse_args()
     output = args.output
 
+    # Check if no arguments were provided, then print usage
+    if len(vars(args)) < 5:
+        parser.print_help()
+        return
+
+    # Check the path to output dir
     if output:
         try:
             assert os.path.isdir(output)
-        except AssertionError as e:
+        except AssertionError:
             print("Error: input output path must be a directory!!")
-            raise e
+            sys.exit(1)
 
     if args.command == "find_most_frequent_sequences":
         analyzer = FastqAnalyzer(args.path, num_cpus=num_cpus, method="find_most_frequent_sequences", n_top=args.n_top)

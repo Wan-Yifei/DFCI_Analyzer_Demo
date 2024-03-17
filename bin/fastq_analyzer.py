@@ -1,8 +1,8 @@
 import os
 import logging
 import functools
+from bin import utility
 from collections import Counter
-from multiprocessing import Pool
 from Bio import SeqIO
 
 filename_suffix = {
@@ -30,38 +30,6 @@ def log(func):
             raise
 
     return wrapper
-
-
-# Not use
-# for potential improvement: split file for parallel
-def batch_iterator(iterator, batch_size):
-    """
-    Returns lists of length batch_size.
-    """
-    batch = []
-    for entry in iterator:
-        batch.append(entry)
-        if len(batch) == batch_size:
-            yield batch
-            batch = []
-    if batch:
-        yield batch
-
-
-# Not use
-# for potential improvement: split file for parallel
-def file_reader(file_path, row_count_limit=10000):
-    """
-    Split file.
-    :param file_path:
-    :param row_count_limit:
-    :return:
-    """
-    for i, batch in enumerate(batch_iterator(file_path, row_count_limit)):
-        filename = "group_%i.fastq" % (i + 1)
-        with open(filename, "w") as handle:
-            count = SeqIO.write(batch, handle, "fastq")
-        print("Wrote %i records to %s" % (count, filename))
 
 
 class FastqAnalyzer(object):
@@ -164,6 +132,4 @@ class FastqAnalyzer(object):
             list: A list of results containing file path, total sequence count, percentage of long sequences, and threshold.
         """
         num_processes = min(self.num_cpus, len(self.fastq_files))
-        with Pool(num_processes) as pool:
-            results = pool.map(getattr(self, self.method), self.fastq_files)
-            return results
+        return utility.parallel_process(n_cpu=num_processes, func=getattr(self, self.method), sources=self.fastq_files)
