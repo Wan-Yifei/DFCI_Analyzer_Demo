@@ -5,6 +5,7 @@ from pathlib import Path
 from multiprocessing import cpu_count
 from bin.fastq_analyzer import FastqAnalyzer
 
+
 def main():
     num_cpus = max(cpu_count() - 1, 1)
     parser = argparse.ArgumentParser(description="Bioinformatics Toolbox Demo")
