@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 import functools
 from collections import Counter

@@ -1,10 +1,7 @@
 import os
 import argparse
-import sys
 from pathlib import Path
 from multiprocessing import cpu_count
-
-sys.path.append('./bin')
 from fastq_analyzer import FastqAnalyzer
 
 
@@ -80,6 +77,7 @@ def main():
             print(f"The percent of sequences in that file that are greater than {args.threshold} nucleotides long:")
             print(output_table)
             print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+
 
 if __name__ == "__main__":
     main()
