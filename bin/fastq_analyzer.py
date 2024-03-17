@@ -1,9 +1,7 @@
-import logging
 from bin.utility import *
 from Bio import SeqIO
 
 logger = logging.getLogger("FastqAnalyzer")
-
 
 
 class FastqAnalyzer(object):
