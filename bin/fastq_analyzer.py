@@ -8,7 +8,7 @@ class FastqAnalyzer(object):
     """
     Analyzes FASTQ files and performs various analyses.
     """
-
+    @log
     def __init__(self, directory, num_cpus, method, threshold=None, n_top=None):
         """
         Initializes the FastqAnalyzer instance.

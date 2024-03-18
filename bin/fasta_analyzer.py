@@ -7,12 +7,15 @@ from bin.utility import *
 @log
 def fast_file_reader(file_path, batch_size=subfile_count_per_file, turn_on_split=False):
     """
-    Split file.
-    :param batch_size:
-    :param turn_on:
-    :param file_path:
-    :param row_count_limit:
-    :return: list of temp files.
+    Reads a FASTA file and splits it into smaller temporary files.
+
+    Args:
+        file_path (str): Path to the input FASTA file.
+        batch_size (int): Size of each batch of sequences (default is subfile_count_per_file).
+        turn_on_split (bool): Flag indicating whether to split the file (default is False).
+
+    Returns:
+        list: List of paths to temporary files containing batches of sequences.
     """
     temp_files = []
     if not turn_on_split:
@@ -31,6 +34,7 @@ def fast_file_reader(file_path, batch_size=subfile_count_per_file, turn_on_split
 
 
 class FastaAnalyzer:
+    @log
     def __init__(self, directory, num_cpus, method, n_top=10, turn_on_split_file=False):
         """
         Initializes FastaAnalyzer class.
@@ -40,6 +44,7 @@ class FastaAnalyzer:
             num_cpus (int): Number of CPUs to utilize for processing.
             method (str): Method for analysis.
             n_top (int): Number of top frequent sequences to return (default is 10).
+            turn_on_split_file (bool): Flag indicating whether to split the input files (default is False).
         """
         self.directory = directory
         self.num_cpus = num_cpus
@@ -65,18 +70,34 @@ class FastaAnalyzer:
 
     @log
     def find_most_frequent_sequences(self, file_name, sequence_counter_iter):
+        """
+        Finds the most frequent sequences among multiple sequence counters.
+
+        Args:
+            file_name (str): Name of the FASTA file being processed.
+            sequence_counter_iter (iterable): Iterable of sequence counters.
+
+        Returns:
+            tuple: A tuple containing the file name and a list of tuples of the most frequent sequences and their counts.
+        """
         merged_counter = Counter()
         for seq_counter in sequence_counter_iter:
             merged_counter.update(dict(seq_counter))
         most_common = merged_counter.most_common(self.n_top)  # Getting most common sequences
         return file_name, most_common  # Returning list of most common sequences and their counts
 
+    @log
     def downstream_trigger(self):
+        """
+        Gets the downstream method based on the selected analysis method.
+
+        Returns:
+            method: The downstream method to execute.
+        """
         downstream_map = {
             "count_sequences": "find_most_frequent_sequences"
         }
         return getattr(self, downstream_map[self.method])
-
 
     @log
     def analyze(self):
@@ -84,7 +105,7 @@ class FastaAnalyzer:
         Analyzes FASTA files using multiprocessing.
 
         Returns:
-            list: A list of resultsd.
+            list: A list of results.
         """
         summary = []
         for fasta in self.fasta_files:
