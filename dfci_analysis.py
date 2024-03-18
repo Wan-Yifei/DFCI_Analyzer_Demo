@@ -5,8 +5,10 @@ from pathlib import Path
 from multiprocessing import cpu_count
 from bin.fastq_analyzer import FastqAnalyzer
 from bin.fasta_analyzer import FastaAnalyzer
+from bin.utility import *
 
 
+@measure_execution_time
 def main():
     num_cpus = max(cpu_count() - 1, 1)
     parser = argparse.ArgumentParser(description="Bioinformatics Toolbox Demo")
@@ -20,7 +22,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Subparser for the analyze command
-    parser_analyze = subparsers.add_parser("analyze", help="Analyze FASTQ files")
+    parser_analyze = subparsers.add_parser("analyze", help="Analyze Bioinformatics' files")
     parser_analyze.add_argument("path", help="Path to a directory containing FASTQ files or a single FASTQ file")
 
     # Subparser for the count_long_read command
@@ -34,7 +36,10 @@ def main():
                                                                              " files")
     parser_freq.add_argument("-n", "--n_top", type=int, default=10, help="Number of most frequent sequences to return")
     parser_freq.add_argument("-s", "--split_input_flag", action='store_true', help="Split input FASTA to support "
-                                                                                       "parallel process or Not.")
+                                                                                   "parallel process or Not.")
+    parser_freq.add_argument("-r", "--subfile_rows_per_file", default=subfile_row_count_per_file, help="Row number of "
+                                                                                                       "each subfile "
+                                                                                                       "from split")
     args = parser.parse_args()
     output = args.output
 
@@ -53,7 +58,7 @@ def main():
 
     if args.command == "find_most_frequent_sequences":
         analyzer = FastaAnalyzer(args.path, num_cpus=num_cpus, method="count_sequences", n_top=args.n_top,
-                                 turn_on_split_file=args.split_input_flag)
+                                 turn_on_split_file=args.split_input_flag, batch_size=args.subfile_rows_per_file)
         results = analyzer.analyze()
         for seq_count in results:
             output_table = ["Rank\tSequence\tCount"]

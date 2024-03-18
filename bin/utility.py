@@ -1,6 +1,7 @@
 import os
 import functools
 import logging
+import timeit
 from multiprocessing import Pool
 from bin.constant import *
 
@@ -10,6 +11,39 @@ console_handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
+
+
+def measure_execution_time(func):
+    """
+    Decorator to measure the execution time of a function.
+
+    Args:
+        func (function): The function to be decorated.
+
+    Returns:
+        function: The wrapped function.
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        """
+        Wrapper function that measures the execution time of the decorated function.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Any: The result of the decorated function.
+        """
+        start_time = timeit.default_timer()
+        result = func(*args, **kwargs)
+        end_time = timeit.default_timer()
+        execution_time = end_time - start_time
+        print(f"------------------------------------------------")
+        print(f"Execution time of {func.__name__}: {execution_time:.6f} seconds")
+        print(f"------------------------------------------------")
+        return result
+    return wrapper
 
 
 def log(func):

@@ -5,4 +5,4 @@ filename_suffix = {
 }
 
 # Split file
-subfile_count_per_file = 100000
+subfile_row_count_per_file = 1e6
