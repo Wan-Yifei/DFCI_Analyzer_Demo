@@ -83,17 +83,3 @@ def batch_iterator(iterator, batch_size):
             batch = []
     if batch:
         yield batch
-
-
-def fast_file_reader(file_path, row_count_limit=10000):
-    """
-    Split file.
-    :param file_path:
-    :param row_count_limit:
-    :return:
-    """
-    for i, batch in enumerate(batch_iterator(file_path, row_count_limit)):
-        filename = "group_%i.fastq" % (i + 1)
-        with open(filename, "w") as handle:
-            count = SeqIO.write(batch, handle, "fastq")
-        print("Wrote %i records to %s" % (count, filename))

@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 from multiprocessing import cpu_count
 from bin.fastq_analyzer import FastqAnalyzer
+from bin.fasta_analyzer import FastaAnalyzer
 
 
 def main():
@@ -32,7 +33,8 @@ def main():
     parser_freq = subparsers.add_parser("find_most_frequent_sequences", help="Find most frequent sequences in FASTQ"
                                                                              " files")
     parser_freq.add_argument("-n", "--n_top", type=int, default=10, help="Number of most frequent sequences to return")
-
+    parser_freq.add_argument("-s", "--split_input_flag", action='store_true', help="Split input FASTA to support "
+                                                                                       "parallel process or Not.")
     args = parser.parse_args()
     output = args.output
 
@@ -50,7 +52,8 @@ def main():
             sys.exit(1)
 
     if args.command == "find_most_frequent_sequences":
-        analyzer = FastqAnalyzer(args.path, num_cpus=num_cpus, method="find_most_frequent_sequences", n_top=args.n_top)
+        analyzer = FastaAnalyzer(args.path, num_cpus=num_cpus, method="count_sequences", n_top=args.n_top,
+                                 turn_on_split_file=args.split_input_flag)
         results = analyzer.analyze()
         for seq_count in results:
             output_table = ["Rank\tSequence\tCount"]
