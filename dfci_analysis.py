@@ -35,16 +35,14 @@ def main():
     parser_freq = subparsers.add_parser("find_most_frequent_sequences", help="Find most frequent sequences in FASTQ"
                                                                              " files")
     parser_freq.add_argument("-n", "--n_top", type=int, default=10, help="Number of most frequent sequences to return")
-    parser_freq.add_argument("-s", "--split_input_flag", action='store_true', help="Split input FASTA to support "
-                                                                                   "parallel process or Not.")
-    parser_freq.add_argument("-r", "--subfile_rows_per_file", default=subfile_row_count_per_file, help="Row number of "
-                                                                                                       "each subfile "
-                                                                                                       "from split")
+    parser_freq.add_argument("-k", "--chuck_size", type=int, default=1, help="Number of processes submitted to the "
+                                                                              "pool each time")
     args = parser.parse_args()
     output = args.output
 
     # Check if no arguments were provided, then print usage
     if len(vars(args)) < 5:
+        print("Error: Miss required arguments. Please check!!")
         parser.print_help()
         return
 
@@ -57,8 +55,8 @@ def main():
             sys.exit(1)
 
     if args.command == "find_most_frequent_sequences":
-        analyzer = FastaAnalyzer(args.path, num_cpus=num_cpus, method="count_sequences", n_top=args.n_top,
-                                 turn_on_split_file=args.split_input_flag, batch_size=args.subfile_rows_per_file)
+        analyzer = FastaAnalyzer(args.path, num_cpus=num_cpus, method="find_most_frequent_sequences", n_top=args.n_top,
+                                 chuck_size=args.chuck_size)
         results = analyzer.analyze()
         for seq_count in results:
             output_table = ["Rank\tSequence\tCount"]

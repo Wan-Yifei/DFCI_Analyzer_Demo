@@ -61,7 +61,7 @@ def log(func):
 
 
 @log
-def parallel_process(n_cpu, func, sources):
+def parallel_process(n_cpu, func, sources, lazy_map=False, chunk_size=1):
     """
     Execute a function concurrently using multiple processes.
 
@@ -69,15 +69,19 @@ def parallel_process(n_cpu, func, sources):
         n_cpu (int): Number of CPU cores to utilize.
         func (function): The function to be executed concurrently.
         sources (list): List of input data to be processed by the function.
+        lazy_map (bool): If True, uses lazy evaluation with imap. (default is False)
+        chunksize_size (int): Number of items to send to the worker process at a time. (default is 2)
 
     Returns:
         list: List containing the results of applying the function to each input in sources.
     """
     with Pool(n_cpu) as pool:
-        # Map the function over the input data and execute it concurrently using multiple processes
-        results = pool.map(func, sources)
+        if lazy_map:
+            results = list(pool.imap(func, sources, chunk_size))
+        else:
+            # Map the function over the input data and execute it concurrently using multiple processes
+            results = pool.map(func, sources)
         return results
-
 
 @log
 def find_input_files(method, input_path):
