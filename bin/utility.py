@@ -2,7 +2,7 @@ import os
 import functools
 import logging
 import timeit
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from bin.constant import *
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def parallel_process(n_cpu, func, sources, lazy_map=False, chunk_size=1):
         func (function): The function to be executed concurrently.
         sources (list): List of input data to be processed by the function.
         lazy_map (bool): If True, uses lazy evaluation with imap. (default is False)
-        chunksize_size (int): Number of items to send to the worker process at a time. (default is 2)
+        chunk_size (int): Number of items to send to the worker process at a time. (default is 2)
 
     Returns:
         list: List containing the results of applying the function to each input in sources.
@@ -84,7 +84,7 @@ def parallel_process(n_cpu, func, sources, lazy_map=False, chunk_size=1):
         return results
 
 @log
-def find_input_files(method, input_path):
+def find_input_files(method, input_path, is_file_flag=False):
     """
     Finds all input files in the specified directory.
 
@@ -94,6 +94,7 @@ def find_input_files(method, input_path):
     suffix = filename_suffix[method]
     input_files = []
     if os.path.isdir(input_path):
+        assert not is_file_flag, "Input path is required as a single file, please check!!"
         for root, dirs, files in os.walk(input_path):
             for file in files:
                 if file.endswith(suffix):
