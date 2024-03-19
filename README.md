@@ -127,6 +127,7 @@ The module used for calling REST APIs can be found in `bin/ensembl_variant_info_
 The entire REST API is subject to rate limiting, with a limit of 55,000 requests per hour. Exceeding this limit will result in denial of further requests.
   
 ```bash
+# The default species is set to 'human' but can be specified using the -s argument.
 # Generate output file to work directory if the output directory path isn't provided by using the -o option.
 dfci-analysis -o <path_to_output_directory> variant_info -p <path_to_variant_ids>
 ```
