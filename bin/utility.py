@@ -93,6 +93,7 @@ def find_input_files(method, input_path, is_file_flag=False):
     """
     suffix = filename_suffix[method]
     input_files = []
+    assert os.path.exists(input_path)
     if os.path.isdir(input_path):
         assert not is_file_flag, "Input path is required as a single file, please check!!"
         for root, dirs, files in os.walk(input_path):
@@ -102,7 +103,7 @@ def find_input_files(method, input_path, is_file_flag=False):
     elif os.path.isfile(input_path) and input_path.endswith(suffix):
         input_files.append(input_path)
     if not input_files:
-        raise ValueError(f"Invalid path provided or file is not a valid type for the chosen method, '{suffix}' files!"
+        raise FileNotFoundError(f"Invalid path provided or file is not a valid type for the chosen method, '{suffix}' files!"
                          f" are required by {method}.")
     for file in input_files:
         if os.path.getsize(file) == 0:

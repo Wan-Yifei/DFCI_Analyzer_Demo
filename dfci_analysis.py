@@ -6,6 +6,7 @@ from multiprocessing import cpu_count
 from bin.fastq_analyzer import FastqAnalyzer
 from bin.fasta_analyzer import FastaAnalyzer
 from bin.annotator import GTFAnnotation
+from bin.interval_analyzer import IntervalSummary
 from bin.utility import *
 
 
@@ -47,6 +48,14 @@ def main():
                                                                            "annotation")
     parser_anno.add_argument("-s", "--chuck_size", type=int, default=1, help="Number of processes submitted to the "
                                                                              "pool each time")
+    # Subparser for the interval_summary command
+    parser_interval = subparsers.add_parser("interval_summary", help="Summarize interval data by mean for each group "
+                                                                     "of bins of specified column")
+    parser_interval.add_argument("-p", "--path", required=True, help="Path to the interval data file")
+    parser_interval.add_argument("-b", "--bins_num", type=int, default=10, help="Number of bins for %GC (default: 10)")
+    parser_interval.add_argument("-g", "--group_by_key", default="%gc",
+                                 help="Column name to group the data by (default: '%gc')")
+
     args = parser.parse_args()
     output = args.output
 
@@ -110,7 +119,7 @@ def main():
             print(output_table)
             print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         if output:
-            print(f"INFO: output directory -> {output_file}")
+            print(f"INFO: output directory -> {output}")
             print("INFO: Analysis complete!")
             print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     elif args.command == "annotation":
@@ -124,6 +133,17 @@ def main():
                                   chuck_size=args.chuck_size)
         annotator.annotate_all_positions()
         print("INFO: Annotation complete!")
+        print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    elif args.command == "interval_summary":
+        if not output:
+            output = "."  # default: output to work directory
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print("INFO: Summarizing interval data")
+        processor = IntervalSummary(args.path, args.group_by_key, args.bins_num)
+        output_file = os.path.join(output, Path(args.path).stem + ".group_mean.tsv")
+        processor.process_data(output_file)
+        print(f"INFO: Mean for each {args.group_by_key} bin written to {output_file}")
+        print("INFO: Interval summary complete!")
         print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 

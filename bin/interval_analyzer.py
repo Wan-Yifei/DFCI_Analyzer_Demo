@@ -14,7 +14,7 @@ class IntervalSummary:
     """
 
     @log
-    def __init__(self, input_path, group_by_key,  bins_num=10):
+    def __init__(self, input_path, group_by_key, bins_num=10):
         """
         Initialize the IntervalSummary object.
 
@@ -26,6 +26,22 @@ class IntervalSummary:
         self.file_path = input_path
         self.bins_num = bins_num
         self.group_by_key = group_by_key
+
+    @log
+    def check_path_is_file(self):
+        """
+        Check if the given path exists and is a file.
+
+        Args:
+        - path: A string representing the path to be checked.
+
+        Returns:
+        - The path if it exists and is a file, otherwise None.
+        """
+        if not os.path.exists(self.file_path):
+            raise FileNotFoundError(f"The path '{self.file_path}' does not exist.")
+        elif not os.path.isfile(self.file_path):
+            raise NotADirectoryError(f"The path '{self.file_path}' exists but is not a file.")
 
     @log
     def pre_fix_input(self):
@@ -77,7 +93,7 @@ class IntervalSummary:
         # Group the data by specified key and calculate mean coverage for each bin
         data[bins_column] = pd.cut(data[self.group_by_key], bins)
         grouped = data.groupby(bins_column)['mean_coverage'].mean().reset_index()
+        grouped.rename(columns={'mean_coverage': 'mean_target_coverage', bins_column: self.group_by_key}, inplace=True)
 
         # Write the results to a CSV file
         grouped.to_csv(output_file, index=False, sep="\t", na_rep='NA')
-        print(f"Mean coverage for each {self.group_by_key} bin written to {output_file}")
