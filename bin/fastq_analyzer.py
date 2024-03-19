@@ -64,4 +64,5 @@ class FastqAnalyzer(object):
             list: A list of results containing file path, total sequence count, percentage of long sequences, and threshold.
         """
         num_processes = min(self.num_cpus, len(self.fastq_files))
-        return parallel_process(n_cpu=num_processes, func=getattr(self, self.method), sources=self.fastq_files)
+        return parallel_process(n_cpu=num_processes, func=getattr(self, self.method), sources=self.fastq_files,
+                                lazy_map=True)

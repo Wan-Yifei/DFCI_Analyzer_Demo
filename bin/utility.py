@@ -2,6 +2,8 @@ import os
 import functools
 import logging
 import timeit
+from tqdm import tqdm
+from pathlib import Path
 from multiprocessing import Pool, cpu_count
 from bin.constant import *
 
@@ -23,6 +25,7 @@ def measure_execution_time(func):
     Returns:
         function: The wrapped function.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """
@@ -43,6 +46,7 @@ def measure_execution_time(func):
         print(f"Execution time of {func.__name__}: {execution_time:.6f} seconds")
         print(f"------------------------------------------------")
         return result
+
     return wrapper
 
 
@@ -77,11 +81,12 @@ def parallel_process(n_cpu, func, sources, lazy_map=False, chunk_size=1):
     """
     with Pool(n_cpu) as pool:
         if lazy_map:
-            results = list(pool.imap(func, sources, chunk_size))
+            results = list(tqdm(pool.imap(func, sources, chunk_size), total=len(sources)))
         else:
             # Map the function over the input data and execute it concurrently using multiple processes
             results = pool.map(func, sources)
         return results
+
 
 @log
 def find_input_files(method, input_path, is_file_flag=False):
@@ -93,8 +98,9 @@ def find_input_files(method, input_path, is_file_flag=False):
     """
     suffix = filename_suffix[method]
     input_files = []
+    assert os.path.exists(input_path), f"Input path {input_path} doesn't Exist!!"
     if os.path.isdir(input_path):
-        assert not is_file_flag, "Input path is required as a single file, please check!!"
+        assert not is_file_flag, f"Input path {input_path} is required as a single file, please check!!"
         for root, dirs, files in os.walk(input_path):
             for file in files:
                 if file.endswith(suffix):
@@ -102,12 +108,29 @@ def find_input_files(method, input_path, is_file_flag=False):
     elif os.path.isfile(input_path) and input_path.endswith(suffix):
         input_files.append(input_path)
     if not input_files:
-        raise ValueError(f"Invalid path provided or file is not a valid type for the chosen method, '{suffix}' files!"
-                         f" are required by {method}.")
+        raise FileNotFoundError(f"Invalid path f{input_path} provided or file is not a valid type for the chosen "
+                                f"method, '{suffix}' files! are required by {method}.")
     for file in input_files:
         if os.path.getsize(file) == 0:
             print(f"Warning: File '{input_path}' has zero file size.")
     return input_files
+
+
+@log
+def check_path_is_file(file_path):
+    """
+    Check if the given path exists and is a file.
+
+    Args:
+    - path: A string representing the path to be checked.
+
+    Returns:
+    - The path if it exists and is a file, otherwise None.
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The path '{file_path}' does not exist.")
+    elif not os.path.isfile(file_path):
+        raise NotADirectoryError(f"The path '{file_path}' exists but is not a file.")
 
 
 def batch_iterator(iterator, batch_size):
@@ -122,3 +145,22 @@ def batch_iterator(iterator, batch_size):
             batch = []
     if batch:
         yield batch
+
+
+def make_output_path(output_dir, input_file, suffix_extension):
+    """
+    Create an output path for a file based on the input file path and the specified output directory and suffix extension.
+
+    Args:
+        output_dir (str): The directory where the output file will be placed.
+        input_file (str): The path to the input file.
+        suffix_extension (str): The suffix and extension to be appended to the input file's stem.
+
+    Returns:
+        str: The output file path.
+
+    Example:
+        If output_dir='/output', input_file='/path/to/input.txt', and suffix_extension='.output.txt',
+        then the output file path will be '/output/input.output.txt'.
+    """
+    return os.path.join(output_dir, Path(input_file).stem + suffix_extension)
