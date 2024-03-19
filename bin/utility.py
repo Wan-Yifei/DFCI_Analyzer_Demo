@@ -2,6 +2,7 @@ import os
 import functools
 import logging
 import timeit
+from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
 from bin.constant import *
 
@@ -77,7 +78,7 @@ def parallel_process(n_cpu, func, sources, lazy_map=False, chunk_size=1):
     """
     with Pool(n_cpu) as pool:
         if lazy_map:
-            results = list(pool.imap(func, sources, chunk_size))
+            results = list(tqdm(pool.imap(func, sources, chunk_size), total=len(sources)))
         else:
             # Map the function over the input data and execute it concurrently using multiple processes
             results = pool.map(func, sources)
@@ -93,7 +94,7 @@ def find_input_files(method, input_path, is_file_flag=False):
     """
     suffix = filename_suffix[method]
     input_files = []
-    assert os.path.exists(input_path)
+    assert os.path.exists(input_path), "Input path doesn't Exist!!"
     if os.path.isdir(input_path):
         assert not is_file_flag, "Input path is required as a single file, please check!!"
         for root, dirs, files in os.walk(input_path):
@@ -103,8 +104,8 @@ def find_input_files(method, input_path, is_file_flag=False):
     elif os.path.isfile(input_path) and input_path.endswith(suffix):
         input_files.append(input_path)
     if not input_files:
-        raise FileNotFoundError(f"Invalid path provided or file is not a valid type for the chosen method, '{suffix}' files!"
-                         f" are required by {method}.")
+        raise FileNotFoundError(f"Invalid path provided or file is not a valid type for the chosen method, '{suffix}' "
+                                f"files! are required by {method}.")
     for file in input_files:
         if os.path.getsize(file) == 0:
             print(f"Warning: File '{input_path}' has zero file size.")
