@@ -42,7 +42,7 @@ The module used for counting sequences can be found in `/bin/fastq_analyzer.py`.
 ```bash
 # The default threshold is set to 30 but can be specified using the -t argument.
 # All FASTQ files in the input directory will be processed in parallel.
-# If an output path is provided, the output file will be generated separately for each input file.
+# If an output path is provided, the output file will be generated.
 # Use the -c option to set the number of CPU cores to use for analysis (default: max(CPU - 1)).
 
 # Print output to stdout if the output directory path isn't provided by using the -o option.
