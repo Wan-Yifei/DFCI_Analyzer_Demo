@@ -141,11 +141,26 @@ the data on any cloud platform to run bioinformatics analysis pipelines. The
 users can run any cloud service, there is no restriction. The framework’s 
 responsibility is only to make data accessible with access controls.**
 
+A: A highly effective solution for sharing large files is leveraging cloud object storage services like AWS S3. This platform boasts exceptional accessibility. Moreover, AWS S3 provides robust access control mechanisms to ensure secure file management.
+
+Access control within AWS S3 is facilitated through a multi-layered approach, primarily categorized into resource-based policies and user policies. Resource-based policies, including bucket policies and access point policies, are directly linked to resources like buckets and objects. For instance, access point policies enable us to restrict usage to specific VPC endpoints or whitelist IP addresses, enhancing security measures.
+
+On the other hand, user policies are attached to individual users within your AWS account. By granting fundamental read and write permissions to other AWS users, we ensure controlled access. Preferably, it's best practice to grant permissions to IAM roles rather than individual users. IAM roles function similarly to IAM users but are intended to be assumed by anyone who requires them, even across accounts. This approach enhances cross-account AWS S3 access control.
+
+For users without AWS accounts, a viable solution is to provide a presigned URL, granting temporary access to download the file securely. This method ensures seamless file sharing while maintaining security measures.
+
+Based on the aforementioned access control measures, all authorized users, whether within our AWS account or granted access via IAM roles or presigned URLs, can securely download files from our bucket.
 
 ### Q7.
 **Evaluate the benefits and limitations of using containerization and container 
 orchestration technologies, such as Docker and Kubernetes, for deploying and 
 managing bioinformatics HPC workloads in the cloud.**
+
+A: Using containerization offers several advantages such as isolation for applications and portability across environments. Docker images facilitate easy version control and encapsulate the entire software stack for simplified management. Additionally, containers are more resource-efficient than VMs as they don't require their own operating system.
+
+Container orchestration technologies like Kubernetes further enhance scalability by dynamically allocating resources for optimal performance, ensuring an elastic environment.
+
+Nevertheless, containerization may lead to increased image storage requirements, and configuring communication between containers can be complex. Moreover, OS kernel sharing poses security risks, expanding the attack surface if not appropriately managed.
 
 ### Q8.
 **For the following SQL statement, what is wrong with it and how would you fix it**
@@ -156,5 +171,13 @@ FROM Invoices
 HAVING COUNT(OrderId) >= 1
 ```
 
-## Contributors
+A: The `HAVING` clause in SQL is specifically designed to filter results based on aggregate functions, and it must come after the `GROUP BY` clause. This means that when using aggregate functions, we first need to specify how to group your data. In this case, we can group the data by the `UserId` column:
+```sql
+SELECT UserId, AVG(Total) AS AvgOrderTotal
+FROM Invoices
+GROUP BY UserId
+HAVING COUNT(OrderId) >= 1;
+```
+
+## Contributor
 - Yifei Wan (wanyifei0123@gmail.com)
