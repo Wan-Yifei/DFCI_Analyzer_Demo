@@ -159,7 +159,7 @@ def main():
         print("INFO: Retrieving variant information from Ensembl...")
         retriever = EnsemblVariantInfoRetriever(args.species, args.path, output_file, args.skip_bad_call)
         retriever.fetch_and_write_variant_info()
-        print("Variant information retrieval complete!")
+        print("INFO: Variant information retrieval complete!")
         print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 
