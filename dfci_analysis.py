@@ -97,7 +97,7 @@ def main():
                     print(output_table, file=output_path)
             else:
                 print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                print(f"Top {args.n_top} Most Frequent sequences")
+                print(f"Top {args.n_top}  Most Frequent sequences")
                 print(f"File: {file_name}:")
                 print(output_table)
                 print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
