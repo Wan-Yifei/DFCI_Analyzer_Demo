@@ -112,6 +112,23 @@ def find_input_files(method, input_path, is_file_flag=False):
     return input_files
 
 
+@log
+def check_path_is_file(file_path):
+    """
+    Check if the given path exists and is a file.
+
+    Args:
+    - path: A string representing the path to be checked.
+
+    Returns:
+    - The path if it exists and is a file, otherwise None.
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The path '{file_path}' does not exist.")
+    elif not os.path.isfile(file_path):
+        raise NotADirectoryError(f"The path '{file_path}' exists but is not a file.")
+
+
 def batch_iterator(iterator, batch_size):
     """
     Returns lists of length batch_size.

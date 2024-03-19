@@ -26,22 +26,7 @@ class IntervalSummary:
         self.file_path = input_path
         self.bins_num = bins_num
         self.group_by_key = group_by_key
-
-    @log
-    def check_path_is_file(self):
-        """
-        Check if the given path exists and is a file.
-
-        Args:
-        - path: A string representing the path to be checked.
-
-        Returns:
-        - The path if it exists and is a file, otherwise None.
-        """
-        if not os.path.exists(self.file_path):
-            raise FileNotFoundError(f"The path '{self.file_path}' does not exist.")
-        elif not os.path.isfile(self.file_path):
-            raise NotADirectoryError(f"The path '{self.file_path}' exists but is not a file.")
+        check_path_is_file(self.file_path)
 
     @log
     def pre_fix_input(self):
