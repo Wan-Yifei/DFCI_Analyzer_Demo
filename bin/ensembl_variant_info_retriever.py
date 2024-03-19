@@ -2,8 +2,8 @@ import csv
 import ast
 import requests
 from requests.exceptions import RequestException
-from utility import *
-from constant import *
+from bin.utility import *
+from bin.constant import *
 
 
 class EnsemblVariantInfoRetriever:

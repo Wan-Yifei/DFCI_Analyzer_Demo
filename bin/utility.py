@@ -3,6 +3,7 @@ import functools
 import logging
 import timeit
 from tqdm import tqdm
+from pathlib import Path
 from multiprocessing import Pool, cpu_count
 from bin.constant import *
 
@@ -24,6 +25,7 @@ def measure_execution_time(func):
     Returns:
         function: The wrapped function.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """
@@ -44,6 +46,7 @@ def measure_execution_time(func):
         print(f"Execution time of {func.__name__}: {execution_time:.6f} seconds")
         print(f"------------------------------------------------")
         return result
+
     return wrapper
 
 
@@ -83,6 +86,7 @@ def parallel_process(n_cpu, func, sources, lazy_map=False, chunk_size=1):
             # Map the function over the input data and execute it concurrently using multiple processes
             results = pool.map(func, sources)
         return results
+
 
 @log
 def find_input_files(method, input_path, is_file_flag=False):
@@ -141,3 +145,22 @@ def batch_iterator(iterator, batch_size):
             batch = []
     if batch:
         yield batch
+
+
+def make_output_path(output_dir, input_file, suffix_extension):
+    """
+    Create an output path for a file based on the input file path and the specified output directory and suffix extension.
+
+    Args:
+        output_dir (str): The directory where the output file will be placed.
+        input_file (str): The path to the input file.
+        suffix_extension (str): The suffix and extension to be appended to the input file's stem.
+
+    Returns:
+        str: The output file path.
+
+    Example:
+        If output_dir='/output', input_file='/path/to/input.txt', and suffix_extension='.output.txt',
+        then the output file path will be '/output/input.output.txt'.
+    """
+    return os.path.join(output_dir, Path(input_file).stem + suffix_extension)

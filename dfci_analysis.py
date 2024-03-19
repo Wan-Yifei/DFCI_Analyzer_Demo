@@ -1,12 +1,12 @@
 import os
 import sys
 import argparse
-from pathlib import Path
 from multiprocessing import cpu_count
 from bin.fastq_analyzer import FastqAnalyzer
 from bin.fasta_analyzer import FastaAnalyzer
 from bin.annotator import GTFAnnotation
 from bin.interval_analyzer import IntervalSummary
+from bin.ensembl_variant_info_retriever import EnsemblVariantInfoRetriever
 from bin.utility import *
 
 
@@ -55,6 +55,12 @@ def main():
     parser_interval.add_argument("-b", "--bins_num", type=int, default=10, help="Number of bins for %GC (default: 10)")
     parser_interval.add_argument("-g", "--group_by_key", default="%gc",
                                  help="Column name to group the data by (default: '%gc')")
+    # Subparser for the variant_info command
+    parser_variant = subparsers.add_parser("variant_info", help="Retrieve variant information from Ensembl")
+    parser_variant.add_argument("-p", "--path", required=True, help="Path to the file containing variant IDs")
+    parser_variant.add_argument("-s", "--species", default="human", help="Species for variant information retrieval")
+    parser_variant.add_argument("--skip_bad_call", action="store_true",
+                                help="Skip variant IDs that fail to fetch information")
 
     args = parser.parse_args()
     output = args.output
@@ -125,9 +131,9 @@ def main():
     elif args.command == "annotation":
         if not output:
             output = "."  # default: output to work directory
+        output_file = make_output_path(output, args.path, ".annotated.tsv")
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         print(f"INFO: Annotate input file {args.path}")
-        output_file = os.path.join(output, Path(args.path).stem + ".annotated.tsv")
         print(f"INFO: Output file -> {output_file}")
         annotator = GTFAnnotation(args.path, args.knowledge_base, output_file, num_cpus=args.cpu,
                                   chuck_size=args.chuck_size)
@@ -137,13 +143,23 @@ def main():
     elif args.command == "interval_summary":
         if not output:
             output = "."  # default: output to work directory
+        output_file = make_output_path(output, args.path, ".group_mean.tsv")
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         print("INFO: Summarizing interval data")
         processor = IntervalSummary(args.path, args.group_by_key, args.bins_num)
-        output_file = os.path.join(output, Path(args.path).stem + ".group_mean.tsv")
         processor.process_data(output_file)
         print(f"INFO: Mean for each {args.group_by_key} bin written to {output_file}")
         print("INFO: Interval summary complete!")
+        print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    elif args.command == "variant_info":
+        if not output:
+            output = "."  # default: output to work directory
+        output_file = make_output_path(output, args.path, ".ensembl.annotated.tsv")
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print("INFO: Retrieving variant information from Ensembl...")
+        retriever = EnsemblVariantInfoRetriever(args.species, args.path, output_file, args.skip_bad_call)
+        retriever.fetch_and_write_variant_info()
+        print("Variant information retrieval complete!")
         print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 
